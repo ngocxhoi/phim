@@ -60,7 +60,7 @@ function handleInput(event: any) {
 }
 
 const url = computed(
-  () => `api/movies/search?query=${searchTerm.value}&page=${page.value}`
+  () => `/api/movies/search?query=${searchTerm.value}&page=${page.value}`
 );
 const { data } = await useFetch<ApiResponse>(url);
 </script>

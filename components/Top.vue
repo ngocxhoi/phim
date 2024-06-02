@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-20 w-full box-border md:px-20 px-8 flex items-center justify-between bg-[--main-color] overflow-y-hidden"
+    class="h-20 w-full box-border md:px-20 px-8 flex items-center justify-between bg-[--main-color]"
   >
     <div class="md:hidden">
       <Icon
@@ -16,7 +16,11 @@
     </div>
 
     <div class="hidden md:flex">
-      <Logo class="md:mr-8" />
+      <div
+        class="overflow-hidden h-full w-24 flex items-center justify-center md:mr-8"
+      >
+        <Logo />
+      </div>
       <ul class="items-center text-gray-300 font-semibold md:flex hidden">
         <li
           class="mr-6 hover:text-blue-400 cursor-pointer text-nowrap xl:block hidden"
@@ -181,7 +185,7 @@
       />
       <div
         v-if="search && data"
-        class="absolute right-0 mt-2 bg-[#7dab84] w-full min-w-60 min-h-40 max-h-96 rounded overflow-y-auto hidden md:block"
+        class="absolute z-10 right-0 mt-2 bg-[#7dab84] w-full min-w-60 min-h-40 max-h-96 rounded overflow-y-auto hidden md:block"
       >
         <div>
           <div v-for="movie in data?.results">
@@ -441,10 +445,10 @@ function showMdSearch() {
   if (mdSearch.value == false) search.value = "";
 }
 
-const url = computed(() => `api/movies/search?query=${search.value}&page=1`);
+const url = computed(() => `/api/movies/search?query=${search.value}&page=1`);
 const { data } = await useFetch<ApiResponse>(url);
 
 function resetSearch() {
-  search.value = "spi";
+  search.value = "";
 }
 </script>
