@@ -1,19 +1,23 @@
 <template>
   <MainLayout>
-    <div class="grid grid-cols-3 box-border p-8 gap-8">
+    <div class="md:grid grid-cols-3 box-border p-8 gap-8 flex flex-col">
       <div class="col-span-2 overflow-x-hidden">
-        <div
-          v-if="data"
-          class="flex w-full bg-[--bg-color] mb-4 box-border p-4"
-        >
-          <NuxtImg :src="url + data?.poster_path" class="w-1/3" />
-          <div class="box-border px-4 w-2/3">
+        <div class="flex w-full bg-[--bg-color] mb-4 box-border p-4">
+          <NuxtImg
+            v-if="movieLoading && data"
+            :src="url + data?.poster_path"
+            class="w-1/3 min-w-52"
+          />
+          <div v-else class="w-1/3">
+            <USkeleton class="w-full aspect-[9/14]" />
+          </div>
+          <div v-if="movieLoading && data" class="box-border px-4 w-2/3">
             <div>
               <h1 class="text-3xl font-bold text-orange-400 leading-10">
-                {{ data.title }}
+                {{ data?.title }}
               </h1>
               <p class="text-base text-gray-400">
-                {{ data.original_title }} (2024)
+                {{ data?.original_title }} (2024)
               </p>
             </div>
 
@@ -25,24 +29,24 @@
                   <strong>Trạng thái:</strong>
                   <span
                     class="py-0.5 px-3 bg-gray-400 rounded-full ml-2 font-semibold"
-                    >{{ data.status }}</span
+                    >{{ data?.status }}</span
                   >
                 </li>
                 <li class="truncate">
                   <strong>Thể loại:</strong>
-                  <span v-for="genre in data.genres" class="ml-2">{{
+                  <span v-for="genre in data?.genres" class="ml-2">{{
                     genre.name
                   }}</span>
                 </li>
-                <li><strong>Thời lương:</strong> {{ data.runtime }} phút</li>
+                <li><strong>Thời lương:</strong> {{ data?.runtime }} phút</li>
                 <li>
                   <strong>Quốc gia:</strong>
-                  <span v-for="el in data.origin_country" class="ml-2">{{
+                  <span v-for="el in data?.origin_country" class="ml-2">{{
                     el
                   }}</span>
                 </li>
                 <li>
-                  <strong>Ngày khởi chiếu:</strong> {{ data.release_date }}
+                  <strong>Ngày khởi chiếu:</strong> {{ data?.release_date }}
                 </li>
               </ul>
             </div>
@@ -64,14 +68,28 @@
               </button>
             </div>
           </div>
+          <div v-else class="box-border px-4 w-2/3">
+            <USkeleton class="w-full h-10 rounded-full mb-2" />
+            <USkeleton class="w-2/3 h-5 rounded-full mb-2" />
+            <USkeleton class="w-full aspect-[1/0.5]" />
+          </div>
         </div>
 
-        <div v-if="data" class="box-border p-4 mb-4 bg-[--bg-color]">
+        <div
+          v-if="movieLoading && data"
+          class="box-border p-4 mb-4 bg-[--bg-color]"
+        >
           <h1 class="text-white uppercase mb-2">Nội dung phim</h1>
-          <h1 class="text-white mb-2">{{ data.original_title }}</h1>
-          <p class="text-gray-400 mb-2">{{ data.overview }}</p>
+          <h1 class="text-white mb-2">{{ data?.original_title }}</h1>
+          <p class="text-gray-400 mb-2">{{ data?.overview }}</p>
 
-          <NuxtImg :src="url + data.backdrop_path" class="my-8" />
+          <NuxtImg :src="url + data?.backdrop_path" class="my-8" />
+        </div>
+
+        <div v-else class="box-border p-4 rounded bg-[--bg-color]">
+          <USkeleton class="w-2/5 h-4 mb-2" />
+          <USkeleton class="w-1/5 h-4 mb-2" />
+          <USkeleton class="w-full aspect-[1/0.5]" />
         </div>
 
         <div class="box-border p-4 rounded bg-[--bg-color]">
@@ -80,95 +98,105 @@
         <!-- <pre class="text-blue-500">{{ data }}</pre> -->
       </div>
 
-      <div class="col-span-1">
-        <div
-          class="flex items-center border-l-4 p-2 mb-6 border-l-blue-400 text-white font-semibold text-lg bg-black"
-        >
-          Phim sắp chiếu
-        </div>
-
-        <div class="flex flex-col w-full">
+      <div
+        class="col-span-1 flex flex-col sm:flex-row justify-between md:block overflow-x-hidden"
+      >
+        <div>
           <div
-            v-for="item in $moviesStore.upcoming"
-            class="w-full flex mb-6 border-b-[0.5px] border-b-gray-200/70"
+            class="flex items-center border-l-4 p-2 mb-6 border-l-blue-400 text-white font-semibold text-lg bg-black"
           >
-            <NuxtImg
-              @click="navigateTo('/details/' + item.id)"
-              loading="lazy"
-              :src="url + item.poster_path"
-              width="100"
-              alt=""
-            />
-            <div class="flex flex-col items-start justify-evenly">
-              <div class="ml-4">
-                <p
-                  @click="navigateTo('/details/' + item.id)"
-                  class="text-sm text-white font-semibold truncate cursor-pointer"
-                >
-                  {{ item.original_title }}
-                </p>
-                <span class="text-xs text-gray-400 italic"
-                  >Ngày khời chiếu: {{ item.release_date }}</span
-                >
-              </div>
+            Phim sắp chiếu
+          </div>
 
-              <div class="w-full ml-4 flex items-center">
-                <div
-                  class="flex items-center justify-start text-sm w-fit px-2 py-1 rounded-lg border border-gray-600 text-gray-400"
-                >
-                  <Icon name="mdi:star" color="yellow" class="mr-1" />
-                  {{ item.vote_average }}
+          <div class="flex flex-col w-full">
+            <div
+              v-for="item in $moviesStore.upcoming"
+              class="w-full flex mb-6 border-b-[0.5px] border-b-gray-200/70"
+            >
+              <NuxtImg
+                @click="navigateTo('/details/' + item.id)"
+                loading="lazy"
+                :src="url + item.poster_path"
+                width="100"
+                alt=""
+              />
+              <div class="flex flex-col items-start justify-evenly">
+                <div class="ml-4">
+                  <p
+                    @click="navigateTo('/details/' + item.id)"
+                    class="text-sm text-white font-semibold truncate text-wrap cursor-pointer"
+                  >
+                    {{ item.original_title }}
+                  </p>
+                  <span class="text-xs text-gray-400 italic"
+                    >Ngày khời chiếu: {{ item.release_date }}</span
+                  >
                 </div>
-                <div class="text-gray-400 text-sm ml-4 rounded-xl">
-                  Original language:
-                  <span class="uppercase">{{ item.original_language }}</span>
+
+                <div
+                  class="w-full ml-4 flex lg:items-center items-start lg:flex-row flex-col"
+                >
+                  <div
+                    class="flex items-center justify-start text-sm w-fit px-2 py-1 rounded-lg border border-gray-600 text-gray-400"
+                  >
+                    <Icon name="mdi:star" color="yellow" class="mr-1" />
+                    {{ item.vote_average }}
+                  </div>
+                  <div class="text-gray-400 text-sm lg:ml-4 rounded-xl">
+                    Original language:
+                    <span class="uppercase">{{ item.original_language }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div
-          class="flex items-center border-l-4 p-2 my-6 border-l-blue-400 text-white font-semibold text-lg bg-black"
-        >
-          Phim đang hot
-        </div>
-
-        <div class="flex flex-col w-full">
+        <div class="md:mt-6">
           <div
-            v-for="item in $moviesStore.top_rated"
-            class="w-full flex mb-6 border-b-[0.5px] border-b-gray-200/70"
+            class="flex items-center border-l-4 p-2 mb-6 border-l-blue-400 text-white font-semibold text-lg bg-black"
           >
-            <NuxtImg
-              @click="navigateTo('/details/' + item.id)"
-              loading="lazy"
-              :src="url + item.poster_path"
-              width="100"
-              alt=""
-            />
-            <div class="flex flex-col items-start justify-evenly">
-              <div class="ml-4">
-                <p
-                  @click="navigateTo('/details/' + item.id)"
-                  class="text-sm text-white font-semibold truncate cursor-pointer"
-                >
-                  {{ item.original_title }}
-                </p>
-                <span class="text-xs text-gray-400 italic"
-                  >Ngày khời chiếu: {{ item.release_date }}</span
-                >
-              </div>
+            Phim đang hot
+          </div>
 
-              <div class="w-full ml-4 flex items-center">
-                <div
-                  class="flex items-center justify-start text-sm w-fit px-2 py-1 rounded-lg border border-gray-600 text-gray-400"
-                >
-                  <Icon name="mdi:star" color="yellow" class="mr-1" />
-                  {{ item.vote_average }}
+          <div class="flex flex-col w-full">
+            <div
+              v-for="item in $moviesStore.top_rated"
+              class="w-full flex mb-6 border-b-[0.5px] border-b-gray-200/70"
+            >
+              <NuxtImg
+                @click="navigateTo('/details/' + item.id)"
+                loading="lazy"
+                :src="url + item.poster_path"
+                width="100"
+                alt=""
+              />
+              <div class="flex flex-col items-start justify-evenly">
+                <div class="ml-4">
+                  <p
+                    @click="navigateTo('/details/' + item.id)"
+                    class="text-sm text-white font-semibold truncate cursor-pointer"
+                  >
+                    {{ item.original_title }}
+                  </p>
+                  <span class="text-xs text-gray-400 italic"
+                    >Ngày khời chiếu: {{ item.release_date }}</span
+                  >
                 </div>
-                <div class="text-gray-400 text-sm ml-4 rounded-xl">
-                  Original language:
-                  <span class="uppercase">{{ item.original_language }}</span>
+
+                <div
+                  class="w-full ml-4 flex lg:items-center items-start lg:flex-row flex-col"
+                >
+                  <div
+                    class="flex items-center justify-start text-sm w-fit px-2 py-1 rounded-lg border border-gray-600 text-gray-400"
+                  >
+                    <Icon name="mdi:star" color="yellow" class="mr-1" />
+                    {{ item.vote_average }}
+                  </div>
+                  <div class="text-gray-400 text-sm lg:ml-4 rounded-xl">
+                    Original language:
+                    <span class="uppercase">{{ item.original_language }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -187,18 +215,19 @@ const url = "https://image.tmdb.org/t/p/original";
 
 const route = useRoute();
 let data = ref();
+let movieLoading = ref(false);
 
 onMounted(async () => {
-  let id = route.params.id;
-  let { data: res } = await $moviesStore.getMovieDetails(
-    `/movie/${id}?language=en-US`,
-    {
-      query: {
-        movie_id: route.params.id,
-      },
-    }
-  );
-  data.value = res.value;
+  try {
+    movieLoading.value = false;
+    let id = route.params.id;
+    let { data: res } = await useFetch(`/api/movies/${id}`);
+    data.value = res.value;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    movieLoading.value = true;
+  }
 });
 </script>
 

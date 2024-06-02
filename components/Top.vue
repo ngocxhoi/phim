@@ -1,13 +1,13 @@
 <template>
   <div
-    class="h-20 w-full box-border md:px-20 px-0 flex items-center justify-between bg-[--main-color]"
+    class="h-20 w-full box-border md:px-20 px-8 flex items-center justify-between bg-[--main-color] overflow-y-hidden"
   >
     <div class="md:hidden">
       <Icon
         name="mdi:format-list-bulleted"
         size="30"
         @click="showSlideOver = true"
-        class="cursor-pointer"
+        class="cursor-pointer text-white"
       />
       <SlideOver
         :show-slide-over="showSlideOver"
@@ -19,7 +19,7 @@
       <Logo class="md:mr-8" />
       <ul class="items-center text-gray-300 font-semibold md:flex hidden">
         <li
-          class="mr-6 hover:text-blue-400 cursor-pointer text-nowrap lg:block hidden"
+          class="mr-6 hover:text-blue-400 cursor-pointer text-nowrap xl:block hidden"
         >
           Đang hót
         </li>
@@ -136,7 +136,7 @@
           :items="item5"
           mode="hover"
           :popper="{ placement: 'bottom-start' }"
-          class="mr-6"
+          class="mr-6 hidden lg:block"
           :ui="{
             background: 'bg-black',
             ring: 'ring-0',
@@ -168,21 +168,74 @@
 
     <Logo class="block md:hidden" />
 
-    <div>
+    <div class="relative">
       <UInput
         icon="i-heroicons-magnifying-glass-20-solid"
-        size="lg"
+        size="sm"
         color="white"
         :trailing="false"
         placeholder="Search..."
         :ui="{ rounded: 'rounded-full' }"
-        class="w-full"
+        class="w-full md:block hidden"
+        @input="debounceSearchTerm"
       />
+      <div
+        v-if="search && data"
+        class="absolute right-0 mt-2 bg-[#7dab84] w-full min-w-60 min-h-40 max-h-96 rounded overflow-y-auto hidden md:block"
+      >
+        <div>
+          <div v-for="movie in data?.results">
+            <SearchCard @movie-chose="resetSearch()" :movie="movie" />
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="cursor-pointer p-1 rounded-full hover:bg-gray-400 md:hidden"
+        @click="showMdSearch()"
+      >
+        <UIcon name="i-heroicons-magnifying-glass" class="text-white size-7" />
+      </div>
+    </div>
+
+    <div class="hidden md:block">
+      <Icon
+        name="mdi:account-circle-outline"
+        class="text-white cursor-pointer"
+        size="30"
+      />
+    </div>
+  </div>
+  <div
+    v-if="mdSearch"
+    class="relative md:hidden w-full z-10 box-border px-8 bg-[--main-color]"
+  >
+    <UInput
+      icon="i-heroicons-magnifying-glass-20-solid"
+      size="sm"
+      color="white"
+      :trailing="false"
+      placeholder="Search..."
+      :ui="{ rounded: 'rounded-full' }"
+      @input="debounceSearchTerm"
+    />
+
+    <div
+      v-if="search && data"
+      class="absolute right-8 mt-2 bg-[#7dab84] w-1/2 min-w-60 min-h-40 max-h-96 rounded overflow-y-auto"
+    >
+      <div>
+        <div v-for="movie in data?.results">
+          <SearchCard @movie-chose="resetSearch()" :movie="movie" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { ApiResponse } from "~/types/ApiResponse";
+
 let showSlideOver = ref(false);
 const item1 = [
   [
@@ -374,6 +427,24 @@ const item5 = [
     },
   ],
 ];
-</script>
 
-<style></style>
+const mdSearch = ref(false);
+const search = ref("");
+const debounceSearchTerm = useDebounce(handleInput, 700);
+
+function handleInput(event: any) {
+  search.value = event.target.value;
+}
+
+function showMdSearch() {
+  mdSearch.value = !mdSearch.value;
+  if (mdSearch.value == false) search.value = "";
+}
+
+const url = computed(() => `api/movies/search?query=${search.value}&page=1`);
+const { data } = await useFetch<ApiResponse>(url);
+
+function resetSearch() {
+  search.value = "spi";
+}
+</script>

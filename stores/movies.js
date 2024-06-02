@@ -22,7 +22,6 @@ export const useMoviesStore = defineStore("moviesStore", {
 
     async getMoviesList(path, type) {
       let res = await useApiAuth(path);
-      console.log(res);
       if (type == "trending_all")
         this.trending_all = this.limitedData(res.data.value.results, 10);
       if (type == "trending_tv") {

@@ -6,7 +6,15 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@pinia-plugin-persistedstate/nuxt",
     "vue3-carousel-nuxt",
-    "@nuxt/image"
+    "@nuxt/image",
   ],
   css: ["@/assets/css/variables.css"],
+
+  runtimeConfig: {
+    apiKey: process.env.API_KEY,
+    apiBaseUrl: process.env.API_BASE_URL,
+    public: {
+      imgBaseUrl: process.env.IMG_BASE_URL,
+    },
+  },
 });
